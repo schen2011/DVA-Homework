@@ -1,0 +1,21 @@
+1.
+Mean Absolute Error	1656.147651
+Root Mean Squared Error	2456.983209
+Relative Absolute Error	0.276606
+Relative Squared Error	0.089608
+Coefficient of Determination	0.910392
+
+2.
+Mean Absolute Error	1265.001752
+Root Mean Squared Error	1783.328763
+Relative Absolute Error	0.253181
+Relative Squared Error	0.067781
+Coefficient of Determination	0.932219
+
+3. After adding width, length, height
+
+Mean Absolute Error	1631.956607
+Root Mean Squared Error	2443.458114
+Relative Absolute Error	0.272566
+Relative Squared Error	0.088624
+Coefficient of Determination	0.911376

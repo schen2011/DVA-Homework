@@ -1,0 +1,16 @@
+c(i): 
+Keying Function: fingerprint 
+Method: key collision
+919 choices
+Keying Function: ngram-fingerprint
+Method: key collision
+909 choices
+c(ii) value.toDate('yyyy-MM-dd','yyyy-MM-dd').toString('EEEE, MMMM dd, yyyy')
+c(iii)
+- Only nominal data: regionidcounty
+- Only ordinal data: buildingqualitytypeid
+c(iv) if(value.toNumber() > 3, "true", "false")
+c(v) replaceChars(value, "*", "")
+c(vi):
+We can split datas by using “Edit column”->”split into several columns”
+It would be better if we have the function to identify the outliers and remove them.

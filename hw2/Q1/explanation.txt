@@ -1,0 +1,1 @@
+I use the excel to finish this task. I choose removing gridlines, which will make it clear without lines. Left and right align numbers, aligning title with data and resizing columns, that could make it comfortable to see.

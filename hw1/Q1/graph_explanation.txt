@@ -1,0 +1,1 @@
+I used the cleaned cvs file to import Gephi, the total number of unrepeated edges is 811, which is 820 initially. As for the layout, I choose Fruchterman Reinhold to describe the graph. Then in Edges column, I make label of the undirected friends of Polo small. Therefore, I can see the directed friends of Polo.

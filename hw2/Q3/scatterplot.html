@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bo Xu</title>
+    <style type = "text/css">
+    div.main {
+        margin: auto;
+        width: 1000px;
+    }
+    .main h2 {
+        text-align: center;
+        margin-top: 500px;
+        font-size: 30px;
+    }
+
+    .pagebreak { page-break-before: always; }
+
+    .axis path,
+    .axis line {
+      fill: none; 
+      stroke: #000;
+    }
+    </style>
+</head>
+
+<body>
+    <div class="main">
+    </div>
+    <script src="../lib/d3.v3.min.js"></script>
+    <script type="text/javascript">
+
+        var margin = {top: 220, right: 150, bottom: 230, left: 40},
+            width = 960 - margin.left - margin.right,
+            height = 900 - margin.top - margin.bottom;
+
+        var symbol = {
+            "0" : d3.svg.symbol().type("circle"),
+            "1" : d3.svg.symbol().type("triangle-up")
+        }
+
+        //set color scale
+        var color = d3.scale.ordinal()
+        .domain(["0", "1"])
+        .range(["blue","red"]);
+
+        //original scatter plot
+        original = function (xname, yname, xlabel, ylabel, title) {
+            var id = title.toLowerCase().replace(/\W+/g, "");
+            var div = d3.select(".main")
+            .append("div")
+            .attr("id", id);
+
+            div.append("h2").text(title);
+
+            var x = d3.scale.linear()
+                .range([0, width])
+                .domain(d3.extent(self.data, function(d) { 
+                    return d[xname]; 
+                }));
+
+            var y = d3.scale.linear()
+                .range([height, 0])
+                .domain(d3.extent(self.data, function(d) { 
+                    return d[yname]; 
+                }));
+
+            var svg = div.append("svg:svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate("+margin.left+","+margin.top + ")");
+
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom");
+
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left");
+
+            svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis)
+            .append("text")
+            .attr("class", "label")
+            .attr("x", width)
+            .attr("y", -10)
+            .attr("font-size", "15px")
+            .style("text-anchor", "end")
+            .text(xlabel);
+
+            svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+            .append("text")
+            .attr("class", "label")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 0)
+            .attr("dy", ".9em")
+            .attr("font-size", "15px")
+            .style("text-anchor", "end")
+            .text(ylabel);
+
+            svg.selectAll(".dot")
+                .data(self.data)
+                .enter()
+                .append("path")
+                .attr("class", "dot")
+                .attr("d", function (d) {
+                  return self.symbol[d.class]();
+                })
+                .attr("transform", function(d) { return "translate(" + x(d[xname]) + "," + y(d[yname]) + ")"; })
+                .style("stroke", function(d){ return color(d.class); })
+                .style("fill", "white");
+
+            var legend = svg.selectAll(".legend")
+                .data(color.domain())
+                .enter().append("g")
+                .attr("class", "legend")
+                .attr("transform", function(d, i){return "translate(0," + i * 30 + ")";});
+
+            legend.append("text")
+                .attr("x", width+120)
+                .attr("y", 0)
+                .attr("dy", ".35em")
+                .attr("font-size", "15px")
+                .style("text-anchor", "end")
+                .text(function(d) { 
+                    if(d=="1")
+                        return "Positive";
+                    else return "Negative";
+                });
+
+            legend.append("path")
+                    .attr("d", function (d) {
+                      return symbol[d]();
+                    })
+                    .attr("transform", "translate("+(width+50)+", 0)")
+                    .style("stroke", color)
+                    .style("fill","white");
+        };
+
+        //scaled scatter plot
+        scaled = function (xname, yname, xlabel, ylabel, title) {
+
+            var id = title.toLowerCase().replace(/\W+/g, "");
+            var div = d3.select(".main")
+            .append("div")
+            .attr("id", id);
+
+            div.append("h2").text(title);
+
+            var x = d3.scale.linear()
+                .range([0, width])
+                .domain(d3.extent(self.data, function(d) { 
+                    return d[xname]; 
+                }));
+
+            var y = d3.scale.linear()
+                .range([height, 0])
+                .domain(d3.extent(self.data, function(d) { 
+                    return d[yname]; 
+                }));
+
+            var r = d3.scale.linear()
+                .range([2,20])
+                .domain(d3.extent(self.data, function(d) { 
+                    return d[xname]*d[yname];
+                }));
+
+            var svg = div.append("svg:svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate("+margin.left+","+margin.top + ")");
+
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom");
+
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left");
+
+            svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis)
+            .append("text")
+            .attr("class", "label")
+            .attr("x", width)
+            .attr("y", -10)
+            .attr("font-size", "15px")
+            .style("text-anchor", "end")
+            .text(xlabel);
+
+            svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+            .append("text")
+            .attr("class", "label")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 0)
+            .attr("dy", ".9em")
+            .attr("font-size", "15px")
+            .style("text-anchor", "end")
+            .text(ylabel);
+
+            svg.selectAll("circle")
+                .data(self.data)
+                .enter()
+                .append("circle")
+                .attr("d", d3.svg.symbol())
+                .attr("r", function(d){
+                    return r(d[xname]*d[yname]);
+                })
+                .attr("transform", function(d) { return "translate(" + x(d[xname]) + "," + y(d[yname]) + ")"; })
+                .style("stroke", function(d){ return color(d.class); })
+                .style("fill", "white");
+
+            var legend = svg.selectAll(".legend")
+                .data(color.domain())
+                .enter().append("g")
+                .attr("class", "legend")
+                .attr("transform", function(d, i){return "translate(0," + i * 30 + ")";});
+
+            legend.append("text")
+                .attr("x", width+120)
+                .attr("y", 0)
+                .attr("dy", ".35em")
+                .attr("font-size", "15px")
+                .style("text-anchor", "end")
+                .text(function(d) { 
+                    if(d=="1")
+                        return "Positive";
+                    else return "Negative";
+                });
+
+            legend.append("path")
+                    .attr("d", d3.svg.symbol().type("circle"))
+                    .attr("transform", "translate("+(width+50)+", 0)")
+                    .style("stroke", color)
+                    .style("fill","white");
+        };
+
+        //square-root-scaled
+        SR_scaled = function (xname, yname, xlabel, ylabel, title) {
+            var id = title.toLowerCase().replace(/\W+/g, "");
+            var div = d3.select(".main")
+            .append("div")
+            .attr("id", id);
+
+            div.append("h2").text(title);
+
+            var x = d3.scale.linear()
+                .range([0, width])
+                .domain(d3.extent(self.data, function(d) { 
+                    return d[xname]; 
+                }));
+
+            var y = d3.scale.sqrt()
+                .range([height, 0])
+                .domain(d3.extent(self.data, function(d) { 
+                    return d[yname]; 
+                }));
+
+            var svg = div.append("svg:svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate("+margin.left+","+margin.top + ")");
+
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom");
+
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left");
+
+            svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis)
+            .append("text")
+            .attr("class", "label")
+            .attr("x", width)
+            .attr("y", -10)
+            .attr("font-size", "15px")
+            .style("text-anchor", "end")
+            .text(xlabel);
+
+            svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+            .append("text")
+            .attr("class", "label")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 0)
+            .attr("dy", ".9em")
+            .attr("font-size", "15px")
+            .style("text-anchor", "end")
+            .text(ylabel);
+
+            svg.selectAll(".dot")
+                .data(self.data)
+                .enter()
+                .append("path")
+                .attr("class", "dot")
+                .attr("d", function (d) {
+                  return self.symbol[d.class]();
+                })
+                .attr("transform", function(d) { return "translate(" + x(d[xname]) + "," + y(d[yname]) + ")"; })
+                .style("stroke", function(d){ return color(d.class); })
+                .style("fill", "white");
+
+            var legend = svg.selectAll(".legend")
+                .data(color.domain())
+                .enter().append("g")
+                .attr("class", "legend")
+                .attr("transform", function(d, i){return "translate(0," + i * 30 + ")";});
+
+            legend.append("text")
+                .attr("x", width+120)
+                .attr("y", 0)
+                .attr("dy", ".35em")
+                .attr("font-size", "15px")
+                .style("text-anchor", "end")
+                .text(function(d) { 
+                    if(d=="1")
+                        return "Positive";
+                    else return "Negative";
+                });
+
+            legend.append("path")
+                    .attr("d", function (d) {
+                      return symbol[d]();
+                    })
+                    .attr("transform", "translate("+(width+50)+", 0)")
+                    .style("stroke", color)
+                    .style("fill","white");
+        };
+
+        //log-scaled
+        Log_scaled= function (xname, yname, xlabel, ylabel, title) {
+            var id = title.toLowerCase().replace(/\W+/g, "");
+            var div = d3.select(".main")
+            .append("div")
+            .attr("id", id);
+
+            div.append("h2").text(title);
+
+            var x = d3.scale.linear()
+                .range([0, width])
+                .domain(d3.extent(self.data, function(d) { 
+                    return d[xname]; 
+                }));
+
+            var y = d3.scale.log()
+                .range([height, 0])
+                .domain([1, d3.max(self.data, function(d){
+                    return d[yname];
+                })]);
+
+            var svg = div.append("svg:svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate("+margin.left+","+margin.top + ")");
+
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom");
+
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left");
+
+            svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis)
+            .append("text")
+            .attr("class", "label")
+            .attr("x", width)
+            .attr("y", -10)
+            .attr("font-size", "15px")
+            .style("text-anchor", "end")
+            .text(xlabel);
+
+            svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+            .append("text")
+            .attr("class", "label")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 0)
+            .attr("dy", ".9em")
+            .attr("font-size", "15px")
+            .style("text-anchor", "end")
+            .text(ylabel);
+
+            svg.selectAll(".dot")
+                .data(self.data)
+                .enter()
+                .append("path")
+                .attr("class", "dot")
+                .attr("d", function (d) {
+                  return self.symbol[d.class]();
+                })
+                .attr("transform", function(d) { return "translate(" + x(d[xname]) + "," + y(d[yname]) + ")"; })
+                .style("stroke", function(d){ return color(d.class); })
+                .style("fill", "white");
+
+            var legend = svg.selectAll(".legend")
+                .data(color.domain())
+                .enter().append("g")
+                .attr("class", "legend")
+                .attr("transform", function(d, i){return "translate(0," + i * 30 + ")";});
+
+            legend.append("text")
+                .attr("x", width+120)
+                .attr("y", 0)
+                .attr("dy", ".35em")
+                .attr("font-size", "15px")
+                .style("text-anchor", "end")
+                .text(function(d) { 
+                    if(d=="1")
+                        return "Positive";
+                    else return "Negative";
+                });
+
+            legend.append("path")
+                    .attr("d", function (d) {
+                      return symbol[d]();
+                    })
+                    .attr("transform", "translate("+(width+50)+", 0)")
+                    .style("stroke", color)
+                    .style("fill","white");
+        };
+
+        //import the data and plot the graph
+        d3.csv("diabetes.csv", function (err, csvdata) {
+            if (err) throw err;
+            self.data = csvdata.map(function (d) {
+                return {
+                    plasma_glucose: +d.plasma_glucose,
+                    insulin: +d.insulin,
+                    bmi:+d.bmi,
+                    blood_pressure:+d.blood_pressure,
+                    class: d.class
+                }
+            });
+            original("plasma_glucose", "insulin", "Plasma Glucose", "Insulin", "Plasma Glucose vs. Insulin");
+            original("bmi", "blood_pressure", "BMI", "Blood Pressure", "BMI vs. Blood Pressure");
+            scaled("plasma_glucose", "insulin", "Plasma Glucose", "Insulin", "Plasma Glucose vs. Insulin, scaled symbols");
+            SR_scaled("plasma_glucose", "insulin", "Plasma Glucose", "Insulin", "Plasma Glucose vs. Insulin(square-root-scaled)");
+            Log_scaled("plasma_glucose", "insulin", "Plasma Glucose", "Insulin", "Plasma Glucose vs. Insulin(log-scaled)");
+        });
+        </script>
+      </body>
+</html>

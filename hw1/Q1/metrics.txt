@@ -1,0 +1,5 @@
+Average Node Degree: 1.057
+Diameter: 4
+Average Path length: 2.9295866279651688
+
+The average node degree 1.057 means the number of edges/nodes, to be specific, the average number of followers of each people. The diameter of the graph tells us the relationship between friends has four different steps to relate others at most. The average path length reveals the average distance from one node to another.

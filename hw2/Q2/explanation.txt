@@ -1,0 +1,4 @@
+I used the “5+Math.log2(d.degree)*2”. 
+(1) Add 5: make the nodes with small degree to be visuable.
+(2) log2: make difference among nodes sizes with large different seems not too large.
+(3) *2: log2 seems a little bit small, make it a little bigger.

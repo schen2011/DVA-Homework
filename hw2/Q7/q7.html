@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Bo Xu</title>
+<style>
+
+.states {
+  fill: none;
+  stroke: #fff;
+  stroke-linejoin: round;
+}
+
+.d3-tip.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+}
+
+.d3-tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+}
+
+</style>
+<svg width="1000" height="950"></svg>
+<script src="../lib/d3.v3.min.js"></script>
+<script src="../lib/topojson.v1.min.js"></script>
+<script src="../lib/d3-queue.v3.min.js"></script>
+<script src="../lib/d3.tip.v0.6.3.js"></script>
+<script>
+
+var earnings = d3.map();
+
+var scores = d3.map();
+
+var path = d3.geo.path();
+
+var svg = d3.select("svg"),
+    width = +svg.attr("width"),
+    height = +svg.attr("height");
+
+var tip = d3.tip()
+  .attr('class', 'd3-tip')
+  .offset(function() {
+    return [0,0];
+  })
+  .html(function(d) {
+    return d;
+  });
+
+var x = d3.scale.linear()
+    .domain([20000, 28000])
+    .rangeRound([600, 860]);
+
+var color = d3.scale.threshold()
+    .domain([20000, 22000, 24000, 26000, 28000])
+    .range(["#f0ffff", "#e1ffff", "#afeeee", "#40e0d0", "#00ced1", "#5f9ea0"]);
+
+var g = svg.append("g")
+    .attr("class", "key")
+    .attr("transform", "translate(0,620)");
+
+g.append("text")
+    .attr("class", "caption")
+    .attr("y", -600)
+    .attr("x", x.range()[0])
+    .attr("fill", "#000")
+    .attr("font-weight", "bold")
+    .attr("text-anchor", "start")
+    .text("Range of Median Earnings");
+  
+g.selectAll("rect")
+  .data(color.range().map(function(d) {
+      d = color.invertExtent(d);
+      if (d[0] == null) d[0] = x.domain()[0];
+      if (d[1] == null) d[1] = x.domain()[1];
+      return d;
+    }))
+  .enter().append("rect")
+    .attr("height", 12)
+    .attr("x", function(d){ 
+      return x(d[0]); 
+    })
+    .attr("y", -580)
+    .attr("fill", function(d){ 
+      return color(d[0]); 
+    })
+    .attr("width", function(d){ 
+      return x(d[1]) - x(d[0]); 
+    });
+
+g.selectAll("text")
+  .data(color.domain())
+  .enter()
+  .append("text")
+  .text("$"+20000+" $"+22000+" $"+24000+" $"+26000+" $"+28000)
+  .attr("x", 600)
+  .attr("y",-550);
+
+d3.queue()
+    .defer(d3.json, "us.json")
+    .defer(d3.json, "median_earnings.json")
+    .defer(d3.csv, "median_ages.csv")
+    .await(ready);
+
+function ready(error, us, median_earnings, median_ages) {
+  if (error) throw error;
+
+  median_earnings.forEach(function(d){
+    earnings.set(d.id, +d.median_earnings);
+  });
+  median_ages.forEach(function(d) {
+    var temp=scores.get(d.id)||[];
+    temp.push({
+      name:d.name,mda:+d.median_age
+    });
+    scores.set(d.id, temp);
+  });
+
+  svg.call(tip);
+
+  svg.append("g")
+      .attr("transform", "translate(0,100)")
+      .attr("class", "counties")
+      .selectAll("path")
+      .data(topojson.feature(us, us.objects.states).features)
+      .enter().append("path")
+      .attr("fill", function(d) { return color(d.median_earnings = earnings.get(d.id)); })
+      .attr("d", path)
+      .on('mousemove', function (d) {
+        var msg = "";
+        var array= new Array();
+        var j=0;
+        scores.get(d.id).forEach( function (dd) {
+          array[j] = dd.mda;
+          j++;
+        });
+        array.sort();
+        var last = 0;
+        var count = 0;
+        for(var i = 0; i<5;i++){
+          if(array[i]==null){
+            break;
+          }
+          var cur = array[i];
+          if(cur==last){
+            continue;
+          }
+          last = cur;
+          scores.get(d.id).forEach( function (dd){
+            if(count!=5&&dd.mda==array[i]){
+              count++;
+              msg = msg + dd.name + "(Median Age:" + dd.mda + ")<br/>";
+            }
+          });
+        }
+        tip.show(msg);
+      })
+      .on('mouseout', tip.hide);
+
+  svg.append("path")
+      .datum(topojson.mesh(us, us.objects.states, function(a, b) { 
+        return a !== b; 
+      }))
+      .attr("transform", "translate(0,100)")
+      .attr("class", "states")
+      .attr("d", path);
+
+}
+
+</script>

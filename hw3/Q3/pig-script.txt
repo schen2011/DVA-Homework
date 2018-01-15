@@ -1,0 +1,15 @@
+bigrams = LOAD 's3://cse6242-2017fall-aws-big/*' AS (bigram:chararray, year:int, occurrences:int, books:int);
+
+AftFil = FILTER bigrams BY (occurrences >= 200 AND books >= 10);
+
+cleData = GROUP AftFil BY (bigram);
+
+res = FOREACH cleData GENERATE FLATTEN(group),(double)SUM(AftFil.occurrences)/SUM(AftFil.books);
+
+result = ORDER res BY $1 DESC, $0 ASC;
+
+realRes = LIMIT result 10;
+
+STORE realRes INTO 's3://cse6242-bxu90/output-big/output' USING PigStorage('\t');
+
+

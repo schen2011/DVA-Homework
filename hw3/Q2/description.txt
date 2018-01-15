@@ -1,0 +1,5 @@
+line 19: split the every string line, then store them into the data frame with three column names, “src”, “tgt” and “weight” with the filter that weight is greater than 5.
+line 21: select source and weight column from line 19, assign the negative sign to weight and rename the column name to “n” and “w”.
+line 22: select target and weight column from line 19, and rename the column to “n” and “w”.
+line 24:group the source and target data frame from line 21 and 22 by “n” column, and then sum the weight with the same “n”.
+line 25:change the rdd from integer to string with tab space.

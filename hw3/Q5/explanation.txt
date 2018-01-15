@@ -1,0 +1,1 @@
+In the third part, I added three features, width, length and height. Compared with the first metric, I notice that there is no significant change. The difference of Mean Absolute Error between two metrics is only 20, which can be ignored. They reason is that these three features play little part in predicting the automobile price. They are irrelative.

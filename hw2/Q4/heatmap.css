@@ -1,0 +1,9 @@
+rect.border {
+  stroke: black;
+  stroke-width:1px;  
+}
+
+text.size {
+  font-size: 12pt;
+  fill: #000;
+}

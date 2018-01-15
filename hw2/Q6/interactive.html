@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang = 'en'>
+<head>
+	<meta charset="UTF-8">
+	<title>Bo Xu</title>
+	<script src="../lib/d3.v3.min.js"></script>
+	<style>
+		div.main {
+    		margin: auto;
+    		width: 1000px;
+		}
+
+		.main h1 {
+    		text-align: center;
+		}
+
+		.bar rect {
+  			fill: deepskyblue;
+		}
+
+		.bar text {
+  			fill: white;
+  			font-size: 18px;
+  			text-anchor: start;
+		}
+
+		.axis path {
+  			display: none;
+		}
+
+		.axis line {
+  			fill: none;
+  			stroke: #000;
+  			shape-rendering: crispEdges;
+		}
+
+		.axis text {
+  			font-size: 18px;
+		}
+
+		.axis2 path,
+		.axis2 line {
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+        }
+	</style>>
+</head>
+<body>
+	<div class = 'main'>
+		<h1>
+			English Football Club Value
+		</h1>
+	</div>
+	<script>
+    var margin = {top: 20, right: 230, bottom: 30, left: 200},
+        width = 1000 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
+
+	var dataset = [
+		{club:'Manchester United',value:{year_2013:3165, year_2014:2810, year_2015:3100, year_2016:3317, year_2017:4583}},
+		{club:'Chelsea',value:{year_2013:901, year_2014:868, year_2015:1370, year_2016:1661, year_2017:1845}},
+		{club:'Manchester City',value:{year_2013:689, year_2014:863, year_2015:1380, year_2016:1921, year_2017:2083}},
+		{club:'Liverpool',value:{year_2013:651, year_2014:704, year_2015:982, year_2016:1548, year_2017:1492}},
+		{club:'Arsenal',value:{year_2013:1326, year_2014:1331, year_2015:1310, year_2016:2017, year_2017:1932}}
+		];
+
+	var format = dataset.map(function(cur){
+		var total = cur.value.year_2013+cur.value.year_2014
+					+cur.value.year_2015+cur.value.year_2016
+					+cur.value.year_2017;
+
+		var value = [cur.value.year_2013, cur.value.year_2014,
+			cur.value.year_2015,cur.value.year_2016,cur.value.year_2017];
+
+		return{
+			name:cur.club,
+			value:d3.zip(["2013","2014","2015","2016","2017"], value),
+			total:total
+		}
+    });
+  
+    var svg = d3.select(".main").append("svg:svg")
+        .attr("height", height + margin.top + margin.bottom)
+        .attr("width", width + margin.left + margin.right)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    var x = d3.scale.sqrt()
+        .range([0, width])
+        .domain([0, d3.max(format, function(d) {
+        	return d.total;
+        })])
+        .nice();
+
+    var y = d3.scale.ordinal()
+        .rangeRoundBands([0, height], 0.1)
+        .domain(format.map(function (d) {
+        	return d.name;
+        }));
+
+    var yAxis = d3.svg.axis()
+        .scale(y)
+        .orient("left")
+        .tickPadding(6);
+
+    var bar = svg.selectAll(".bar")
+        .data(format)
+        .enter().append("g")
+        .attr("class", "bar")
+        .attr("transform", function(d) {
+        	return "translate(0," + y(d.name) + ")";
+        });
+
+    bar.append("rect")
+        .attr("width", function (d) { return x(d.total); })
+        .attr("height", y.rangeBand())
+        .on("mouseover", showLegend)
+        .on("mouseout", offLegend);
+
+    bar.append("text")
+        .attr("x", 10)
+        .attr("y", y.rangeBand()*0.5)
+        .attr("dy", ".35em")
+        .text(function(d){
+          return "$" +d.total;
+        });
+
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis);
+
+    var legend = svg.append("g")
+        .attr("transform", "translate(" + (width + 30) + ", " + (height-350) + ")")
+        .attr("class", ".legend");
+
+    function showLegend(data) {
+        d3.selectAll(".lchart").remove();
+
+        d3.select(this).style("fill", "teal");
+
+        var lchart = svg.append("svg")
+            .attr("class", "lchart")
+            .attr("height", height + margin.top + margin.bottom)
+        	.attr("width", width + margin.left + margin.right)
+            .append("g")
+            .attr("transform", "translate(500,150)");
+
+        var x2 = d3.scale.linear().domain([2013, 2017]).range([0, 150]);
+
+        var y2 = d3.scale.linear().domain([d3.min(data.value, function(d) {
+            return d[1];}),d3.max(data.value, function(d) {return d[1]; })])
+            .range([120, 0]);
+
+        var xAxis2 = d3.svg.axis()
+                .scale(x2)
+                .orient("bottom")
+                .ticks(5)
+                .tickFormat(d3.format("d"));
+
+        var yAxis2 = d3.svg.axis()
+                .scale(y2)
+                .orient("left")
+                .ticks(5);
+
+        lchart.append("g")
+            .attr("class", "axis2")
+            .attr("transform", "translate(0, 120)")
+            .call(xAxis2);
+
+
+        lchart.append("g")
+            .attr("class", "axis2")
+            .call(yAxis2);
+
+        var line = d3.svg.line()
+            .x(function(d) {
+            	return x2(d[0]); 
+            })
+            .y(function(d) { 
+            	return y2(d[1]); 
+            });
+
+        lchart.append("path")
+            .attr("d", line(data.value))
+            .style("stroke", "teal")
+            .style("stroke-width", 2)
+            .style("fill", "none");
+    };
+
+    function offLegend(){
+    	d3.selectAll(".lchart").remove();
+        d3.select(this).style("fill", "deepskyblue");
+    }
+	</script>
+</body>
